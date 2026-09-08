@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    ports: ["127.0.0.1:54329:5432"]
+    environment:
+      POSTGRES_DB: stockade
+      POSTGRES_USER: stockade
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stockade_local_only}
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockade -d stockade"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+  fulfil:
+    profiles: ["full"]
+    build: { context: ., dockerfile: services/Fulfil/Dockerfile }
+    environment:
+      URLS: http://+:5080
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=stockade;Username=stockade;Password=${POSTGRES_PASSWORD:-stockade_local_only};Maximum Pool Size=16
+      Payments__Mode: Simulator
+      Mail__Host: mailpit
+    ports: ["127.0.0.1:5080:5080"]
+    depends_on: { postgres: {condition: service_healthy} }
+  web:
+    profiles: ["full"]
+    build: .
+    environment:
+      FULFIL_URL: http://fulfil:5080
+      DATABASE_URL: postgresql://stockade:${POSTGRES_PASSWORD:-stockade_local_only}@postgres:5432/stockade
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [fulfil]
+volumes:
+  postgres_data:

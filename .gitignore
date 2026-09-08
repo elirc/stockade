@@ -1,0 +1,14 @@
+node_modules/
+.next/
+bin/
+obj/
+.env
+.env.local
+.data/
+.tools/
+artifacts/
+test-results/
+playwright-report/
+*.log
+**/appsettings.Local.json
+*.tsbuildinfo

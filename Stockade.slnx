@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="services/Fulfil/Fulfil.csproj" />
+  <Project Path="tests/Fulfil.Tests/Fulfil.Tests.csproj" />
+</Solution>

@@ -1,0 +1,15 @@
+{
+  "name": "stockade", "version": "1.0.0", "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "api": "dotnet run --project services/Fulfil --no-launch-profile",
+    "db:up": "docker compose up -d postgres mailpit"
+  },
+  "dependencies": {"next":"^16.0.0","react":"^19.2.0","react-dom":"^19.2.0","pg":"^8.16.3","lucide-react":"^0.468.0","zod":"^4.0.0"},
+  "devDependencies": {"typescript":"^5.9.0","@types/node":"^22.0.0","@types/react":"^19.2.0","@types/react-dom":"^19.2.0","@types/pg":"^8.15.0","vitest":"^3.2.0","@playwright/test":"^1.56.0"}
+}
