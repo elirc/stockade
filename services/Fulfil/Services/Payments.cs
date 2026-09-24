@@ -76,5 +76,5 @@ public sealed class Payments(IConfiguration configuration, IHttpClientFactory cl
         return json;
     }
     static PaymentResult Parse(JsonNode json) => new(json["id"]!.GetValue<string>(), json["status"]?.GetValue<string>() switch
-    { "requires_capture" => "authorized", "succeeded" => "captured", "requires_action" => "action_required", "canceled" => "voided", _ => "unknown" }, json["client_secret"]?.GetValue<string>(), json["amount"]?.GetValue<long>(), json["currency"]?.GetValue<string>(), json["amount_received"]?.GetValue<long>());
+    { "requires_capture" => "authorized", "succeeded" => "captured", "requires_action" => "requires_action", "canceled" => "voided", _ => "unknown" }, json["client_secret"]?.GetValue<string>(), json["amount"]?.GetValue<long>(), json["currency"]?.GetValue<string>(), json["amount_received"]?.GetValue<long>());
 }
