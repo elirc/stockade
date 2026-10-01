@@ -2,6 +2,9 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
+// BEGIN IMMEDIATE takes the write lock before fn's first read, so a
+// read-then-decide stock check cannot interleave with another writer — even
+// one in a second Node process sharing this file (journal/DECISIONS.md).
 export function transaction(db, fn) {
   db.exec("BEGIN IMMEDIATE");
   try {
@@ -20,6 +23,9 @@ export function openDatabase(path) {
   db.exec(
     "PRAGMA busy_timeout=30000; PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;",
   );
+  // The products CHECKs are the last line of defense for the conservation
+  // invariant onHand >= reserved >= 0: a code path that would oversell or
+  // double-release fails the whole transaction instead of persisting.
   transaction(db, () => {
     db.exec(`
       CREATE TABLE IF NOT EXISTS businesses(id INTEGER PRIMARY KEY,name TEXT NOT NULL);

@@ -96,6 +96,9 @@ export function createApp({
       .all(orderId);
     return row;
   };
+  // event() and ledger() are only ever called inside the same transaction as
+  // the mutation they describe: business state, inventory ledger, and activity
+  // commit atomically or not at all (Sol's audit-trigger rollback test).
   const event = (tenant, orderId, action, detail) =>
     db
       .prepare(
@@ -108,6 +111,9 @@ export function createApp({
         "INSERT INTO inventory_ledger(tenant_id,product_id,order_id,action,on_hand_delta,reserved_delta,created_at) VALUES(?,?,?,?,?,?,?)",
       )
       .run(tenant, productId, orderId, action, physical, reserved, now());
+  // Cancel/decline/expiry release the hold exactly once and never touch
+  // physical stock: reserved -= quantity, onHand unchanged. Callers only reach
+  // here from status='reserved', so a released order cannot release again.
   function release(order, tenant, status) {
     for (const item of order.items) {
       db.prepare(
@@ -123,6 +129,9 @@ export function createApp({
       `Order ${order.number}: reservation released (${status}).`,
     );
   }
+  // Expiry is a state transition, not a cleanup: it runs inside the caller's
+  // write transaction so readers and state actions see post-expiry truth. It
+  // selects status='reserved' only — a paid order's hold is never expired.
   function expireInside(tenant) {
     const rows = tenant
       ? db
@@ -232,6 +241,9 @@ export function createApp({
           "SELECT account_id,created_at FROM sessions WHERE token_hash=?",
         )
         .get(hash(token));
+    // Session age is enforced server-side against the injected clock. Cookie
+    // expiry is browser cooperation, not enforcement: a client can keep an old
+    // cookie and send it manually (journal/READ-ME-FIRST.txt section 5).
     if (
       !session ||
       !Number.isFinite(Date.parse(session.created_at)) ||
@@ -243,7 +255,11 @@ export function createApp({
     next();
   });
   app.get("/api/session", (req, res) => res.json({ account: req.account }));
-  // Optional browser write precondition prevents a stale tab from writing under a newly switched cookie.
+  // Optional browser write precondition: tabs share the cookie, so the server
+  // session can differ from the business a tab displays. Registration order is
+  // load-bearing — this must precede every session mutation, including the
+  // DELETE below, or a stale tab's logout revokes the account another tab just
+  // selected (the stale-tab logout bug, journal/READ-ME-FIRST.txt section 5).
   app.use("/api", (req, res, next) => {
     if (
       req.get("X-Stockade-Account") !== undefined &&
@@ -324,6 +340,9 @@ export function createApp({
       delta = integer(req.body.delta, "Delta", -1000000000, 1000000000),
       reason = text(req.body.reason, "Reason", 300, 1);
     const product = transaction(db, () => {
+      // Operator adjustments carry the stock version the form was opened on.
+      // A concurrent reservation bumps it, so a stale count cannot overwrite
+      // the hold; the 409 forces reconciliation (journal/DECISIONS.md).
       const current = getProduct(productId, req.tenant);
       if (current.version !== version)
         fail(
@@ -332,6 +351,8 @@ export function createApp({
           "Stock changed. Review the current quantities and try again.",
           current,
         );
+      // onHand may never drop below reserved: physical stock backing active
+      // holds cannot be adjusted away.
       if (
         current.onHand + delta < current.reserved ||
         current.onHand + delta > 1000000000
@@ -376,6 +397,9 @@ export function createApp({
       .sort((a, b) => a.productId - b.productId);
     if (new Set(items.map((x) => x.productId)).size !== items.length)
       fail(400, "VALIDATION", "Duplicate product IDs are not allowed.");
+    // Items are sorted and normalized above, so the fingerprint identifies the
+    // cart's intent, not its wire encoding: the same cart retried in any item
+    // order replays; the same key with a different cart is a conflict.
     const fingerprint = hash(JSON.stringify(items));
     const result = transaction(db, () => {
       expireInside(req.tenant);
@@ -384,6 +408,9 @@ export function createApp({
           "SELECT id,fingerprint FROM orders WHERE tenant_id=? AND idempotency_key=?",
         )
         .get(req.tenant, key);
+      // Replay returns the order in its CURRENT lifecycle state (documented
+      // alternative to freezing the original response): after cancellation or
+      // expiry the key shows that terminal order and never reserves again.
       if (existing) {
         if (existing.fingerprint !== fingerprint)
           fail(
@@ -403,6 +430,8 @@ export function createApp({
             `${product.name} has only ${product.available} available.`,
             product,
           );
+        // Prices come from the server catalog and are snapshotted onto order
+        // lines; a client-supplied price or total is rejected by validation.
         const lineTotal = product.priceCents * item.quantity;
         total += lineTotal;
         if (!Number.isSafeInteger(total))
@@ -425,6 +454,9 @@ export function createApp({
         createdAt,
         expiresAt,
       );
+      // Checkout moves only `reserved` upward; onHand is untouched until
+      // shipment. The availability recheck in the UPDATE's WHERE, under the
+      // transaction's write lock, is what makes overselling impossible.
       for (const line of lines) {
         const result = db
           .prepare(
@@ -498,6 +530,10 @@ export function createApp({
         );
       if (action === "refund" && typeof req.body.restock !== "boolean")
         fail(400, "VALIDATION", "Restock must be true or false.");
+      // Expiry runs first, inside this write transaction, and a disallowed
+      // action returns a conflict marker instead of throwing: the 409 is sent
+      // after commit, so a rejected late payment cannot roll the expiry back
+      // and revive the hold (journal/reviews/astra-build.md).
       const result = transaction(db, () => {
         expireInside(req.tenant);
         const order = getOrder(req.params.id, req.tenant);
@@ -530,6 +566,10 @@ export function createApp({
             target === "shipped" ||
             (target === "refunded" && req.body.restock)
           )
+            // Payment keeps the hold (paid stock must stay unsellable).
+            // Shipping consumes it: onHand and reserved both decrease. A
+            // refund with restock adds physical units back exactly once —
+            // the status guard above forbids refunding a refunded order.
             for (const line of order.items) {
               const physical =
                   target === "shipped" ? -line.quantity : line.quantity,
