@@ -1,0 +1,877 @@
+{
+  "timestamp": "2026-10-01T16:30:23.988Z",
+  "results": [
+    {
+      "name": "pending login prevents a competing account selection",
+      "status": "passed"
+    },
+    {
+      "name": "late refresh cannot show the previous business under the next account",
+      "status": "passed"
+    },
+    {
+      "name": "delayed order response cannot replace the later selected order",
+      "status": "passed"
+    },
+    {
+      "name": "pending product write blocks dismissal and duplicate submit",
+      "status": "passed"
+    },
+    {
+      "name": "shared-cookie account switch rejects a stale tab write and reconciles its identity",
+      "status": "passed"
+    },
+    {
+      "name": "stale tab logout cannot revoke the newly selected business session",
+      "status": "passed"
+    }
+  ],
+  "runtimeErrors": [],
+  "network": [
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/styles.css"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/app.js"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/styles.css"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/app.js"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/demo-accounts"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/demo-accounts"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 401,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "DELETE",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 204,
+      "path": "/api/session"
+    },
+    {
+      "event": "failed",
+      "path": "/api/session",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "DELETE",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 204,
+      "path": "/api/session"
+    },
+    {
+      "event": "failed",
+      "path": "/api/session",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/checkouts"
+    },
+    {
+      "event": "response",
+      "status": 201,
+      "path": "/api/checkouts"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/checkouts"
+    },
+    {
+      "event": "response",
+      "status": 201,
+      "path": "/api/checkouts"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/styles.css"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/app.js"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/styles.css"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/app.js"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/demo-accounts"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/demo-accounts"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders/586b87cb-489b-4648-a5c4-e2bcaf08558c"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders/fb218e06-ac6f-4808-b6e2-bb8a28f8f8cd"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders/fb218e06-ac6f-4808-b6e2-bb8a28f8f8cd"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders/586b87cb-489b-4648-a5c4-e2bcaf08558c"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 201,
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "DELETE",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 204,
+      "path": "/api/session"
+    },
+    {
+      "event": "failed",
+      "path": "/api/session",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "DELETE",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 204,
+      "path": "/api/session"
+    },
+    {
+      "event": "failed",
+      "path": "/api/session",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "DELETE",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 204,
+      "path": "/api/session"
+    },
+    {
+      "event": "failed",
+      "path": "/api/session",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "event": "request",
+      "method": "POST",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/products"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/orders"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/summary"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/activity"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/products"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/orders"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/summary"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/activity"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    },
+    {
+      "event": "request",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "event": "response",
+      "status": 200,
+      "path": "/api/session"
+    }
+  ]
+}

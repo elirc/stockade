@@ -1,0 +1,9 @@
+﻿{
+    "VerifiedAt":  "2026-10-01T16:31:08.6036156Z",
+    "Node":  "22.16.0",
+    "Npm":  "10.9.2",
+    "Express":  "5.2.1",
+    "Playwright":  "1.63.0",
+    "Platform":  "Windows",
+    "SourceFormatter":  "Prettier 3.9.9"
+}

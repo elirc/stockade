@@ -1,0 +1,207 @@
+STOCKADE: THE LAST UNIT BELONGS TO ONE ORDER
+===========================================
+A retrospective for Eli — 1 October 2026
+
+Expanded learning material is now available beside this retrospective:
+LEARNING-PATH.md provides a reading sequence; USER-STORY-WALKTHROUGHS.md
+contains eight fictional customer stories and implementation walkthroughs;
+ARCHITECTURE-CLINIC.md explores the technical choices; PRACTICE-WORKBOOK.md
+offers labs, answer guides, a capstone and review prompts. Those teaching
+scenarios are labeled separately from the actual build history below.
+
+This rebuild follows the GitJira exercise but changes the central question.
+GitJira asked whether two editors could lose each other's work. Stockade asks
+whether two buyers can both be promised the same physical unit.
+
+The app is a working local commerce simulator, with catalog, cart, inventory,
+orders, simulated payment, shipment, refund, and an activity trail. It uses
+JavaScript, Express, and SQLite. Payments are fake; no real provider is called.
+You can run it with npm start and open http://127.0.0.1:4318.
+
+This narrative records the actual build and reviews. Astra implemented the
+product; Sol wrote independent adversarial tests and reviewed it; root set
+the contract, challenged integration behavior, tested the browser, and wrote
+the retrospective. The named agents used gpt-6-astra and gpt-6-sol. Statements
+here summarize their explicit engineering rationale, not private reasoning
+or an invented transcript. Exact final results are in VERIFICATION.md.
+
+
+1. MAKE THE WORD "STOCK" PRECISE
+--------------------------------
+
+It is tempting to store one number called stock and decrement it when someone
+clicks Buy. Sol challenged that shortcut by asking for a conservation rule and
+precise terminal transitions. What happens if checkout succeeds but payment
+does not? What does shipping do? What does a timed-out reservation return?
+
+We chose two stored quantities: physical onHand and reserved. Available is
+their difference. Checkout increases reserved. Payment keeps that hold.
+Shipping subtracts from both physical and reserved stock. Cancellation,
+decline, and expiry release the hold without moving physical stock. A refund
+after shipping can return physical units, once, if restocking is selected.
+
+This model makes a common mistake visible: releasing a reservation when
+payment succeeds would let the next buyer purchase already-paid stock.
+Payment and shipment are different facts, even when a simple demo could make
+them happen in the same click.
+
+The useful invariant is onHand >= reserved >= 0. Write it on paper, then walk
+through every arrow in the order lifecycle. If an arrow has no clear effect
+on those quantities, the model is still ambiguous.
+
+
+2. SHARED STORAGE OWNS THE GUARANTEE
+-----------------------------------
+
+The first alternative was a JavaScript mutex around checkout. It might protect
+one Node process and still oversell when a second process starts. We required
+the guarantee to live in the shared database instead.
+
+SQLite BEGIN IMMEDIATE obtains the write lock before reading and changing
+the inventory. Multi-line carts are all-or-nothing. Server-side catalog prices
+are snapshotted on order lines, so a caller cannot submit a convenient total.
+The order, stock changes, inventory ledger, and activity event commit together.
+
+Sol tested failure halfway through the operation by rejecting activity writes
+with a database trigger. A failed command had to leave the business state
+unchanged. That is more useful than simply confirming a success response.
+
+Operator adjustments use a product version as a precondition. The browser test
+opened an adjustment, changed stock through another request, then saved the
+old form. The first save was rejected. Its delta and reason stayed visible,
+and the operator had to review the current quantities before resubmitting.
+
+SQLite is a deliberate local-app choice. Its synchronous API is easy to trace,
+but it blocks the event loop during SQL. We did not use a green correctness
+test as an excuse to describe this as a large hosted commerce platform.
+
+
+3. DISABLED BUTTONS DO NOT MAKE A REQUEST IDEMPOTENT
+---------------------------------------------------
+
+Imagine checkout commits and the response disappears. The buyer cannot tell
+whether clicking again is recovery or a second purchase. A disabled button
+does not solve a reload, a second tab, a network error, or another server.
+
+Stockade stores a business-scoped request key with a normalized cart
+fingerprint. Same key and same intent returns the same order. Different
+intent under that key produces a conflict. Allocation and key persistence
+share one transaction.
+
+Sol suggested freezing the original response as one possible design. Root
+selected a documented alternative: replay returns the same order identity in
+its current lifecycle state. After cancellation, replay shows that canceled
+order; it cannot silently allocate another hold.
+
+The browser suite forwarded a real checkout to the server, then replaced its
+successful response with an injected 503. One order existed. Retrying from
+the UI recovered that order without adding another reservation.
+
+Root also challenged what happens if the user edits the cart while the first
+result is uncertain. Discarding the saved key at that moment loses the only
+reliable link to the possible committed order. The UI review therefore asked
+for recovery of the original intent before proceeding with a different cart.
+The final review files describe the implemented recovery behavior and tests.
+
+The final browser run went further than a same-page retry: it verified that
+quantity/removal controls stayed disabled while checkout was uncertain,
+reloaded the page, and recovered the same order with the persisted key.
+
+
+4. COUNT EVERY OUTCOME UNDER CONTENTION
+--------------------------------------
+
+Sol created a fresh test product with 100 units and started two independent
+server processes against the same database. Five hundred one-unit checkout
+requests, each with a unique key, were split across those processes.
+
+The recorded independent run returned exactly 100 created orders and 400
+sold-out conflicts in 9,225 milliseconds. There were no unexpected 500s or
+timeouts. The database held 100 physical units, 100 reserved units, and zero
+available units. A separate same-key race produced one order and one hold.
+
+The exact duration describes that local run, not a capacity promise. The
+important result is the complete distribution. A test that reports only
+"inventory never went negative" can hide rejected valid orders, request
+timeouts, or a system that accepted almost nothing.
+
+Additional tests covered expiry, repeated payment/shipment/refund commands,
+changed replay intent, stale inventory versions, tenant isolation, stock caps,
+and restart persistence. A full refund with restocking cannot partially commit
+if the returned units would exceed the inventory cap.
+
+When you rebuild this against PostgreSQL, preserve these assertions first.
+Then measure competing transaction strategies. Correctness and throughput
+are separate questions, and both deserve complete outcomes.
+
+
+5. REVIEW ALSO CHALLENGED IDENTITY AND THE BROWSER
+-------------------------------------------------
+
+Sol found that the first server session check accepted an existing token
+without enforcing its lifetime. Browser cookie expiration is not enough:
+a client can retain an old cookie and send it manually. The builder added
+server-side aging, and the regression tested an old stored session directly.
+
+The first nine browser workflows passed, including refunds, expiry, lost
+checkout response recovery, and a mobile layout. Root's source review still
+found request-ownership risks: an old refresh could finish after a business
+switch, and a dialog could be closed while a write was pending, allowing its
+completion to affect a later form.
+
+The requested remedies carried over from GitJira: account/request generations,
+dialog identities, and guards while a mutation is waiting for acknowledgment.
+Source-reasoned risks and browser-observed outcomes are labeled separately in
+the review files; a potential ordering bug is not presented as a failure we
+necessarily reproduced before its fix.
+
+Sol added a subtler objection: tabs share cookies. Switching the account in
+one tab can change the server identity of a second tab whose branding still
+shows the old business. Merely preventing late responses inside one tab does
+not solve that. Root requested a displayed-account precondition for browser
+writes and session reconciliation on refresh, so stale UI cannot silently
+create a product in the newly selected business.
+
+This is why authorization and user intent are related but different. The API
+may correctly authorize the cookie's business while the human is looking at
+another business's screen. A good review tests that mismatch explicitly.
+
+That test exposed a concrete omission in logout. A stale tab's Switch business
+action returned 204 and revoked the account chosen in another tab. The logout
+handler ran before the displayed-account precondition. Astra moved it behind
+that check; the same browser test then received 409, reloaded the correct
+business, and confirmed the new session remained valid.
+
+The final build passed 13 backend tests and 15 browser scenarios. One held-login
+test timed out during an earlier final run; a diagnostic rerun and the following
+complete browser command passed without an application change. Its cause was
+not established. VERIFICATION.md records that uncertainty rather than inventing
+a successful fix. All screenshots and final test evidence accompany the code.
+
+
+6. KEEP THE SIMULATION BOUNDARY VISIBLE
+---------------------------------------
+
+The fake payment transition is intentionally stored in the same database as
+the order. That lets this exercise focus on inventory and state transitions.
+It is not a claim that a real card charge and a local SQL update form one
+atomic transaction. A real integration needs provider idempotency, uncertain
+outcomes, reconciliation, and an explicit recovery policy.
+
+Relay, in the neighboring folder, examines that external-effect gap directly.
+Keeping the two learning goals separate made the observed guarantees clearer.
+
+The UI has real local actions rather than decorative buttons, but this is
+still a learning edition: no real payments, taxes, promotions, carrier API,
+multi-warehouse allocation, or production identity. There are two isolated
+demo businesses, not a real invitation or organization management service.
+
+Use README.md to run it, ARCHITECTURE.md to follow the boundaries, and
+VERIFICATION.md for final counts and evidence. The reviews folder retains
+agent conclusions, and evidence contains results and inspected screenshots.
+
+For your next experiment, predict the result of expiry and payment arriving
+at nearly the same time. Then change the storage engine or add a real payment
+sandbox without weakening that prediction. Require the builder to name the
+uncertain state, the reviewer to produce a concrete counterexample, and the
+verifier to account for every outcome.

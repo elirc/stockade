@@ -1,0 +1,11 @@
+# Sol: Stockade browser script review
+
+I inspected `public/app.js` after the API verification. This is source review, not a claim that I reproduced the behavior in a browser; root owns browser automation. I focused on cart intent, asynchronous responses, dialog writes, and business identity.
+
+The script keeps a durable checkout key and cart in browser storage before sending the request, disables duplicate checkout clicks, and offers same-key recovery when the response is uncertain. It checks request epochs before adopting a `refresh()` response and uses a dialog epoch to discard an obsolete order-detail response. Dialog controls stay disabled while a mutation is in flight, including Escape and backdrop close. These are the right boundaries for the specified local workflow.
+
+I found a cross-tab identity risk and sent it to the builder. Tabs share the cookie, but a tab's periodic `refresh()` originally fetched catalog, orders, summary, and activity without re-reading `/session`. If tab A switched from business 1 to business 2, tab B could continue showing business 1's name while adopting business 2's data and posting writes under business 2's cookie. The builder added account checks before and after each refresh and an `X-Stockade-Account` request precondition; a stale commerce request now gets 409 `ACCOUNT_CHANGED` and reloads. Source inspection confirms this closes the stale-commerce-write path. Root owns browser verification.
+
+One narrower cross-tab edge remained in the revised source: the account precondition middleware came after `DELETE /api/session`, so a stale tab's Switch business action could still delete the other tab's newer session. I reported that to the builder. Root then reproduced it in `tests/ui-races.mjs`: the stale tab's logout returned HTTP 204 when the test expected a 409 account mismatch. The builder moved DELETE below the account precondition and ran Root's unchanged browser test: **6/6 passed**, including stale logout rejection. Source inspection also confirms the middleware now precedes DELETE.
+
+Root separately identified request-epoch, concurrent-login, late order-detail, dialog-close, and ambiguous-checkout concerns for the builder. I did not count those as independent Sol discoveries. I will record their resolved state after the builder's final script lands.

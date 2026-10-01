@@ -1,0 +1,27 @@
+# CI for the Stockade learning edition. This activates when this folder is
+# pushed as its own GitHub repository. It runs the same three commands the
+# README documents for a local verification pass, including the two-process
+# contention test and both browser suites.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.16"
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      # Fresh machines need a browser; the local laptop already had one.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser

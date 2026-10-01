@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-10-01T16:30:10.881Z",
+  "results": [
+    {
+      "name": "login, catalog and desktop layout",
+      "status": "passed"
+    },
+    {
+      "name": "create priced product and inventory with escaped description",
+      "status": "passed"
+    },
+    {
+      "name": "inventory adjustment handles concurrent stock change without losing draft",
+      "status": "passed"
+    },
+    {
+      "name": "reserve, simulated payment, shipment, and restocking refund conserve inventory",
+      "status": "passed"
+    },
+    {
+      "name": "cancel and simulated decline each release their hold once",
+      "status": "passed"
+    },
+    {
+      "name": "expired reservation refuses payment and displays released state",
+      "status": "passed"
+    },
+    {
+      "name": "lost checkout response retries the stored key without a second reservation",
+      "status": "passed"
+    },
+    {
+      "name": "orders, activity, reload persistence and isolated business switching",
+      "status": "passed"
+    },
+    {
+      "name": "mobile catalog and keyboard dialog dismissal",
+      "status": "passed"
+    }
+  ],
+  "runtimeErrors": []
+}
