@@ -54,3 +54,7 @@ Stripe is restricted to test keys and requires your test credentials. Demo tax i
 ## Source-based improvement course
 
 [Start the course](astraupskill/README.md). Follow merchant-scoped refund health, retry boundaries, presentation guidance, and PostgreSQL regression evidence.
+
+## Local learning rebuild (October 2026)
+
+A self-contained local rebuild of this project lives in [rebuild/](rebuild/README.md): an Express + SQLite commerce simulator centered on inventory conservation and idempotent checkout under two-process contention. Built through Astra/Sol adversarial review and expanded into part 2 of a three-project upskilling curriculum — see [CURRICULUM.md](CURRICULUM.md). It runs standalone (Node 22.16+, `npm ci && npm start` inside `rebuild/`) and is fully isolated from the main codebase in this repository.
