@@ -3,9 +3,9 @@ STOCKADE: THE LAST UNIT BELONGS TO ONE ORDER
 A retrospective for Eli — 1 October 2026
 
 Expanded learning material is now available beside this retrospective:
-LEARNING-PATH.txt provides a reading sequence; USER-STORY-WALKTHROUGHS.txt
+LEARNING-PATH.md provides a reading sequence; USER-STORY-WALKTHROUGHS.md
 contains eight fictional customer stories and implementation walkthroughs;
-ARCHITECTURE-CLINIC.txt explores the technical choices; PRACTICE-WORKBOOK.txt
+ARCHITECTURE-CLINIC.md explores the technical choices; PRACTICE-WORKBOOK.md
 offers labs, answer guides, a capstone and review prompts. Those teaching
 scenarios are labeled separately from the actual build history below.
 
