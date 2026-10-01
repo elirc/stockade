@@ -106,6 +106,27 @@ try{
   assert.equal(responses.filter(r=>r.status===200).length,1);assert.equal(responses.filter(r=>r.status===422).length,1);
   await waitOrder(admin,orderId,o=>o.refunded===o.captured);
  });
+ await check('refund health separates retryable and exhausted work by merchant',async()=>{
+  const before=await admin.ok('/data/health'),otherBefore=await other.ok('/data/health');
+  const retryable=randomUUID(),stuck=randomUUID();
+  const lock=await db.connect();
+  try{
+   await lock.query('SELECT pg_advisory_lock(hashtextextended($1,0))',['refund:'+retryable]);
+   await db.query('INSERT INTO "Refunds" ("Id","MerchantId","OrderId","Amount","Reason","State","Attempts","CreatedAt") VALUES ($1,$2,$3,1,\'Health fixture\',\'pending\',11,now()),($4,$2,$3,1,\'Health fixture\',\'pending\',12,now())',[retryable,me.merchantId,orderId,stuck]);
+   const health=await admin.ok('/data/health'),otherAfter=await other.ok('/data/health');
+   assert.equal(health.pendingRefunds,before.pendingRefunds+2);
+   assert.equal(health.retryableRefunds,before.retryableRefunds+1);
+   assert.equal(health.stuckRefunds,before.stuckRefunds+1);
+   assert.deepEqual(
+    {pendingRefunds:otherAfter.pendingRefunds,retryableRefunds:otherAfter.retryableRefunds,stuckRefunds:otherAfter.stuckRefunds},
+    {pendingRefunds:otherBefore.pendingRefunds,retryableRefunds:otherBefore.retryableRefunds,stuckRefunds:otherBefore.stuckRefunds},
+   );
+  }finally{
+   await db.query('DELETE FROM "Refunds" WHERE "Id" = ANY($1::uuid[])',[[retryable,stuck]]);
+   await lock.query('SELECT pg_advisory_unlock(hashtextextended($1,0))',['refund:'+retryable]);
+   lock.release();
+  }
+ });
  await check('declined payment compensates its reservation',async()=>{
   const before=await position(wh[0].id);
   const failed=await customer.cmd('checkout',{lines:[{productId,quantity:1}],address:'Test address',checkoutKey:randomUUID(),paymentMethod:'sim_decline'});

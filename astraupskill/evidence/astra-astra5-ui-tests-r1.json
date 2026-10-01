@@ -1,0 +1,27 @@
+{
+  "project": "astra5",
+  "id": "37844e1ec56d",
+  "command": [
+    "node",
+    "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
+    "run",
+    "test",
+    "--",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--testTimeout=30000"
+  ],
+  "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\37844e1ec56d",
+  "environmentOverrides": {
+    "PYTHONIOENCODING": "utf-8",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  "startedAt": "2026-09-19T23:39:11.060256+00:00",
+  "status": "complete",
+  "log": "astra-astra5-ui-tests-r1.log",
+  "pid": 19092,
+  "exitCode": 0,
+  "passed": true,
+  "finishedAt": "2026-09-19T23:41:59.807499+00:00",
+  "elapsedSeconds": 168.51
+}

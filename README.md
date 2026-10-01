@@ -50,3 +50,7 @@ Fixture scripts are for local synthetic databases, not live merchants. See docs/
 - STOCKADE_MASTER_PROMPT.md: preserved specification and curriculum.
 
 Stripe is restricted to test keys and requires your test credentials. Demo tax is a configurable flat teaching rule, not a jurisdictional tax service. Human competence, independent review, real merchant measures, elapsed production observation and production performance acceptance remain separate evidence requirements.
+
+## Source-based improvement course
+
+[Start the course](astraupskill/README.md). Follow merchant-scoped refund health, retry boundaries, presentation guidance, and PostgreSQL regression evidence.

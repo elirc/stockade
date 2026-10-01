@@ -64,7 +64,15 @@ public static class ReadApi
         if (resource == "health")
         {
             var runs = await db.Reconciliations.Where(x => x.MerchantId == a.MerchantId).OrderByDescending(x => x.CreatedAt).Take(30).ToListAsync();
-            return Results.Ok(new { items = runs, stuckSagas = await db.Orders.CountAsync(x => x.MerchantId == a.MerchantId && x.Attempts >= 12), pendingRefunds = await db.Refunds.CountAsync(x => x.MerchantId == a.MerchantId && x.State == "pending"), deadLetters = await db.Outbox.CountAsync(x => x.MerchantId == a.MerchantId && x.State == "dead") });
+            return Results.Ok(new
+            {
+                items = runs,
+                stuckSagas = await db.Orders.CountAsync(x => x.MerchantId == a.MerchantId && x.Attempts >= 12),
+                pendingRefunds = await db.Refunds.CountAsync(x => x.MerchantId == a.MerchantId && x.State == "pending"),
+                retryableRefunds = await db.Refunds.CountAsync(x => x.MerchantId == a.MerchantId && x.State == "pending" && x.Attempts < 12),
+                stuckRefunds = await db.Refunds.CountAsync(x => x.MerchantId == a.MerchantId && x.State == "pending" && x.Attempts >= 12),
+                deadLetters = await db.Outbox.CountAsync(x => x.MerchantId == a.MerchantId && x.State == "dead")
+            });
         }
         if (resource == "replenishment")
         {
