@@ -1,0 +1,49 @@
+STOCKADE REBUILD — FACTUAL BUILD LOG
+===================================
+Started 1 October 2026 after completing GitJira in a sibling folder.
+
+User requested the other two recommended projects using the same JavaScript,
+Astra/Sol adversarial build process, each in its own folder with a retrospective.
+No new deletion was requested or attempted. GitJira and old organizer contents
+remain outside this folder.
+
+Root set the local-edition contract. Astra owns the runnable backend/frontend;
+Sol independently challenges the design and writes API/contention tests.
+Root owns integration/browser verification and the retrospective. The named
+agents use gpt-6-astra and gpt-6-sol with high reasoning effort.
+
+Initial Sol objection: inventory conservation and terminal transitions must be
+enforced in shared storage, not a process-local lock. The checkout key must be
+durable and bound to its request intent. Payment must not resurrect expired
+holds. Tests must use two real server processes, not one event loop.
+
+Root selected a deliberately local simulated-payment boundary. Stockade's
+reservation, fake payment, shipment, cancellation, expiry, and refund events
+share a database; it does not claim an atomic transaction with a real payment
+provider. Relay separately studies an external-effect/checkpoint boundary.
+
+Implementation and review completed on 1 October 2026.
+
+Astra built the persistent commerce API and responsive UI. Sol independently
+tested inventory conservation, transactional rollback, key replay, lifecycle
+transitions, isolation, stock limits and server-side session aging. The final
+500-request/two-server test returned exactly 100 created and 400 conflicts in
+5,900 ms. The earlier independent run measured 9,225 ms; both conserved stock.
+
+Root's browser review requested request/account/dialog ownership guards and
+recovery before editing an uncertain cart. Tests held responses across account
+switches and dialog changes. Sol challenged shared-cookie identity; the browser
+now sends a displayed-account precondition. Root reproduced a stale-tab logout
+returning 204 and revoking a newer session. Astra moved that route behind the
+precondition; the unchanged test then returned 409 and preserved the session.
+
+All source was formatted with Prettier 3.9.9. Final syntax checks passed for
+10 JavaScript files and npm test passed 13/13. Main browser checks passed 9/9,
+including lost checkout response recovery after page reload. One held-login
+timeout occurred in the timing suite; diagnostics passed 6/6 and the next full
+browser command passed all 15 scenarios without an application change. Cause
+remains unconfirmed and is documented in VERIFICATION.md. No browser runtime
+errors were reported. Desktop and mobile screenshots were visually inspected.
+
+Final evidence and source hashes are under evidence/. The runnable app listens
+locally on port 4318 with persistent demo data in data/. Payments are simulated.

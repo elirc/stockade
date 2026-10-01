@@ -1,0 +1,222 @@
+STOCKADE ARCHITECTURE CLINIC
+===========================
+
+This guide explains the delivered design and explores alternatives. Sections
+explicitly called "extension" describe future work, not completed features.
+Read USER-STORY-WALKTHROUGHS.txt first; keep src/app.js and src/database.js open.
+
+
+1. FOLLOW ONE COMMAND ALL THE WAY THROUGH
+-----------------------------------------
+
+Choose checkout and write its path on paper:
+
+  Human selects items
+    -> browser saves cart + request key
+    -> HTTP validates identity and shape
+    -> database transaction checks replay and stock
+    -> order + lines + stock + ledger + activity commit
+    -> response returns the order
+    -> browser clears or preserves its pending intent
+
+Each arrow has a failure mode. The browser may lose its local state. The
+request may be invalid. A competing buyer may consume availability. A late
+database insert may fail. The response may disappear after commit. The UI may
+receive a response after the operator has moved to another business.
+
+"Checkout works" is therefore several promises, each owned at a different
+boundary. A server test cannot establish that a draft survives a browser
+rerender. A browser test with one request cannot establish two-process stock
+conservation. Select evidence by the promise being made.
+
+Source navigation:
+  src/database.js: transaction helper, constraints, tables, initial seed.
+  src/app.js: identity, validation, commands, scoped reads and responses.
+  src/server.js: persistent file, loopback listener, expiry sweep, shutdown.
+  public/app.js: cart recovery, form conflicts, dialog/request identities.
+  tests/core.test.js: focused domain and boundary behavior.
+  tests/adversarial.test.js: rollback, replay, isolation and lifecycle attacks.
+  tests/contention.test.js: real shared-database server competition.
+  tests/browser.mjs and tests/ui-races.mjs: user workflows and delayed responses.
+
+The route file is intentionally approachable in a local learning edition.
+If it grew, an extraction target would be domain commands that accept explicit
+tenant/actor/clock dependencies and return results. Extracting a file because
+it is long is weaker justification than isolating a coherent policy boundary.
+
+
+2. WHY THREE FORMS OF PROTECTION ARE NOT REDUNDANT
+------------------------------------------------
+
+The database CHECK constraint protects valid quantity relationships. The
+transaction protects a group of related reads and writes. The idempotency key
+protects the identity of a repeated command. None substitutes for the others.
+
+Suppose every product constraint is satisfied but a retry creates a second
+order. The system may still have enough stock for both orders, so no quantity
+constraint fires. It nevertheless violated the user's one-purchase intent.
+
+Suppose an idempotency key is unique but stock changes and order insertion
+commit separately. A crash can reserve inventory with no recoverable order.
+Unique identity did not create an atomic transition.
+
+Suppose all operations use transactions but validation permits a stock count
+below reserved. The transaction can atomically commit an invalid business
+state unless a constraint or command guard rejects it.
+
+A useful review asks: "Which concrete counterexample does this mechanism
+exclude?" If two mechanisms exclude different failures, removing either for
+simplicity changes behavior. If neither has a stated counterexample, it may
+be ceremony rather than protection.
+
+
+3. TRANSACTION TIME IS NOT USER THINKING TIME
+--------------------------------------------
+
+The current transaction helper begins an immediate write transaction, invokes
+a synchronous operation, commits on return, and rolls back on exception. Keep
+that contract visible. Passing an async callback would return a Promise before
+its awaited work completes; this helper is not designed to hold an async
+transaction safely. Do not add an HTTP payment call inside it.
+
+Short transactions are also a capacity choice. An operator can leave a form
+open for an hour; a checkout transaction should last only for its storage work.
+Optimistic versions connect the form's old observation to a later short write.
+
+SQLite WAL permits useful reader/writer concurrency but still serializes
+writers. Two Node processes are not two independent sources of stock truth.
+They coordinate through the file's locking and transactions. A process-local
+mutex can reduce work within one process but cannot replace that coordination.
+
+Extension: moving to PostgreSQL changes the locking options, not the business
+invariant. Design consistent lock ordering for multi-product carts; consider
+row locks or conditional updates; define retry handling for deadlocks. Re-run
+the same conservation and replay assertions before drawing throughput claims.
+Specific database syntax should be checked against the chosen version when
+actually implementing that port; this chapter is a design exercise.
+
+
+4. PRICES ARE FACTS AT A PARTICULAR MOMENT
+-----------------------------------------
+
+Product price is current catalog state. Order-line price is a historical fact
+captured at checkout. If every order rendered today's product price, updating
+the catalog would appear to rewrite old transactions.
+
+The app stores integer cents, calculates totals on the server, and snapshots
+SKU, name, quantity and unit price on each line. A request containing a
+convenient client total is rejected rather than trusted. Safe integer checks
+bound arithmetic in the chosen representation.
+
+This design does not settle every money problem. Discounts introduce rounding
+allocation, taxes introduce jurisdiction and timing rules, and multiple
+currencies introduce currency-specific minor units and conversion facts.
+Those are extensions. Do not claim that using integers alone makes a general
+financial system correct.
+
+Exercise in design, without implementation: discount a three-line order by
+one cent. Where does the cent go? Later refund one line. Which original
+allocation must be stored so the refund is reproducible? A rounding policy
+is part of the product contract because someone sees its consequences.
+
+
+5. EXPIRY IS A STATE TRANSITION, NOT A VISUAL COUNTDOWN
+-----------------------------------------------------
+
+A browser timer can display a deadline but cannot authoritatively release
+stock. The browser may sleep, close, or have a wrong clock. The server handles
+eligible expiry through transaction paths and a periodic sweep.
+
+The sweep improves cleanup when no operator is interacting. Command-time
+checks protect the decision when an action arrives near expiry. Tests inject
+a clock to avoid waiting five real minutes or relying on an exact wall-clock
+race. A deterministic boundary test is easier to diagnose than a sleep followed
+by hope.
+
+Describe the ordering precisely: if a payment transition finds the reservation
+already expired under the server policy, it cannot revive it. If payment has
+validly moved the order to paid, unpaid-reservation expiry no longer applies.
+The app uses local simulated payment, so both decisions live in its database.
+
+Extension: remote payment timestamps, webhook delays and clock differences
+would require a stated late-payment policy. A provider event timestamp alone
+does not decide whether inventory remains allocated locally.
+
+
+6. MODEL ERROR RECOVERY AS PART OF THE API
+-----------------------------------------
+
+An error response should tell the UI what kind of recovery is possible.
+Validation errors ask the user to correct input. A stale version asks for
+review of current data. Missing identity asks for session recovery. Unknown
+checkout outcome asks the browser to retain its original key. Those are not
+interchangeable red banners.
+
+The server uses code/message/current fields where appropriate. The browser
+must preserve the user's draft while changing the available next action.
+Automatically resubmitting every 409 would hide the very conflict that the
+version precondition was designed to reveal.
+
+An operation's UI completion also belongs to a specific context. Imagine
+order A's response arriving after the user opened order B. Without a dialog
+identity, the response can fill the new dialog with old information. Generations
+and identity checks make the ownership explicit. Aborting an obsolete fetch
+can save resources, but cancellation is not a substitute for guarding what a
+response is allowed to change.
+
+The actual stale-tab logout fix illustrates a different boundary: middleware
+ordering. A route placed before the displayed-account check bypassed that
+intent protection. Reading a security helper in isolation would not reveal
+which routes actually pass through it.
+
+
+7. REVIEW THE ALTERNATIVE BEFORE ADDING INFRASTRUCTURE
+------------------------------------------------------
+
+Alternative A: put stock in a cache for faster checkout.
+Question: which store owns the promise, and what happens if the cache and
+order database disagree? A cache of catalog reads is different from delegating
+reservation authority to a second store. Start by measuring the actual delay.
+
+Alternative B: send every checkout through a queue.
+Question: does "accepted" mean reserved, or merely queued for later rejection?
+A queue changes the user contract unless the API still waits for a confirmed
+reservation. Queue persistence alone does not establish available stock.
+
+Alternative C: split payment, inventory and orders into services.
+Question: which formerly atomic transition becomes distributed? Name its
+intermediate states and compensation or reconciliation policy. Independent
+deployment can be valuable, but it adds failure boundaries to a small model.
+
+Alternative D: rebuild all state from events.
+Question: what is the event contract, how are old schemas interpreted, and
+how are corrections represented? The existing ledger is useful evidence but
+does not automatically provide a complete event-sourcing implementation.
+
+For each alternative, write a measurable trigger for revisiting the current
+choice. "When write contention exceeds our latency target at realistic load"
+is actionable. "When the app is enterprise-ready" is not a design criterion.
+
+
+8. A MIGRATION IS A USER STORY WITH OLD DATA
+-------------------------------------------
+
+The current schema initializes at version 1. A future multi-warehouse or
+partial-refund feature needs more than a CREATE TABLE statement. Old orders
+already contain promises made under the earlier model.
+
+A proposed migration review should answer:
+  - Which old rows are mapped, and what defaults preserve their meaning?
+  - Which invariant can be checked before and after the conversion?
+  - Can old and new application versions write safely during rollout?
+  - At what point does rollback stop being lossless?
+  - What backup or restore exercise demonstrates recovery?
+
+Use a fixture with reserved, paid, shipped, cancelled and refunded orders.
+An empty database is a poor migration test because it contains none of the
+hard historical cases. Compare business outcomes, not just row counts.
+
+The operational extension would also track rejected checkouts, conflict rates,
+database busy time, reservation age and reconciliation discrepancies. Metrics
+should reveal a failure of the product promise. Counting requests alone will
+not show that every valid checkout is now being rejected.

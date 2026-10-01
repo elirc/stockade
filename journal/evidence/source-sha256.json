@@ -1,0 +1,58 @@
+﻿[
+    {
+        "Path":  "src\\app.js",
+        "SHA256":  "92FF4B8200D3037E524BC66210F3110F91C6D1A7F42A04F710072DF08A3D2127"
+    },
+    {
+        "Path":  "src\\database.js",
+        "SHA256":  "1AE986F6C347AB842544CD42A43F72F5EDA88C3F8F338F703EDB083C0753CB97"
+    },
+    {
+        "Path":  "src\\server.js",
+        "SHA256":  "73E29568BECA22154246E6A7F933EDA34564F5BB8FD3A94FF87BAA75127A3E0E"
+    },
+    {
+        "Path":  "public\\app.js",
+        "SHA256":  "E1DD93AB29C564ED7F66121101FCDC126D3F468CBC4EF83F96D344635495F7BF"
+    },
+    {
+        "Path":  "public\\index.html",
+        "SHA256":  "7952904CBD04394C21718C9B09B4AAD244784480C26DCD59DCCA190BF3A8413A"
+    },
+    {
+        "Path":  "public\\styles.css",
+        "SHA256":  "E65EAC23C03A711B8C93A90A24AE74B66336758B57BFF883EB05A1444E3FD68D"
+    },
+    {
+        "Path":  "scripts\\check.js",
+        "SHA256":  "BBF37A85FDB7DD0283D1B15584ACEC65AB47AE1B91A52E17C9B4BCCD80A31BE7"
+    },
+    {
+        "Path":  "tests\\adversarial.test.js",
+        "SHA256":  "5730C3A300A6E0D71A4D75F027A31A7E9E58C0C7445279355BA21D89B0512B3E"
+    },
+    {
+        "Path":  "tests\\browser.mjs",
+        "SHA256":  "FB53DCE1A68EA2FEF32BF7F81C931D7DCFFD2112AB0857666B36603C46AED7DC"
+    },
+    {
+        "Path":  "tests\\contention.test.js",
+        "SHA256":  "8AA608BE095A31477D7967B281A2123DFC30129FE32BE92C3553E3DCC5A59DD4"
+    },
+    {
+        "Path":  "tests\\core.test.js",
+        "SHA256":  "7D1852A508A8DEC8D8E5A7E0EFF898C2C22203FCDA6B8F1BA8CB4E3330C3ACBF"
+    },
+    {
+        "Path":  "tests\\ui-races.mjs",
+        "SHA256":  "5923E7406771FE36F223E5FDB5C1BC7461B8739D9EC58E96BA34C8EEFCDE4D19"
+    },
+    {
+        "Path":  "package.json",
+        "SHA256":  "8A042757CCFDCF524AED3700B813745B27570B1EADCA36D3AB35E9C327495D2B"
+    },
+    {
+        "Path":  "package-lock.json",
+        "SHA256":  "0415FAAEEFF89651BF635AF6B51B55994DA0F0FBDD65C116C76206367E254574"
+    }
+]
