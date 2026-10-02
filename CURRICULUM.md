@@ -54,10 +54,14 @@ All three follow the same conventions:
 - `journal/reviews/` — each agent's explicit findings.
 - `journal/diffs/` — the review findings reconstructed as study-able diffs
   (labeled reconstructions; pre-fix source was not preserved).
-- Learning layer — gitjira has `CODE-TOUR.md` + `EXERCISES.md`; stockade and
-  relay have `journal/LEARNING-PATH.md`, `USER-STORY-WALKTHROUGHS.md`
-  (fictional, labeled as such), `ARCHITECTURE-CLINIC.md`, and
-  `PRACTICE-WORKBOOK.md` with labs and answer guides.
+- Learning layer — every project has `journal/LEARNING-PATH.md` and
+  `journal/ARCHITECTURE-CLINIC.md`; gitjira adds `CODE-TOUR.md` +
+  `EXERCISES.md`, while stockade and relay add `USER-STORY-WALKTHROUGHS.md`
+  (fictional, labeled as such) and `PRACTICE-WORKBOOK.md` with labs and answer
+  guides.
+- `journal/worked-examples/` — one break-the-guarantee experiment per project,
+  actually performed once with real captured output (predict → one-line break →
+  observe → restore), as a model for how to run and report your own.
 - Verification is always the same three commands from the project folder:
   `npm run check`, `npm test`, `npm run test:browser`. Each project carries a
   `.github/workflows/ci.yml` that runs them when pushed as its own repository.
@@ -90,6 +94,34 @@ All three follow the same conventions:
 4. **Boundary-moving capstones** (pick one per project): GitJira → PostgreSQL
    port or real auth; Stockade → partial refunds or a migration; Relay →
    persisted wait deadlines or the local webhook adapter.
+
+## Course capstone: one system that needs all three
+
+When all three projects are done, design (then optionally build) the system
+that forces their lessons to coexist: **order fulfillment as a workflow.** A
+Stockade-style order, once paid, starts a Relay-style multi-step fulfillment
+workflow (pick, pack, notify), while GitJira-style collaborative editing
+governs the product catalog the order was priced from.
+
+The design must answer, in writing, before any code:
+
+1. Which facts live in one transaction and which cross a store boundary? (The
+   payment keeps Stockade's rules; the notify step inherits Relay's
+   effect/checkpoint gap.)
+2. What is the identity table — every key, its lifetime, and its reuse
+   semantics? There will be at least six distinct identities. Confusing any
+   two is a concrete bug; name which bug.
+3. Where does a version precondition suffice, and where does a lease become
+   necessary? (A rule of thumb to test: versions guard *state*, leases guard
+   *work in progress*.)
+4. What is the failure matrix for "order paid but fulfillment never started,"
+   and which store is authoritative for each cell?
+5. What evidence would each promise need — which assertions, how many
+   processes, which forced failures?
+
+Review it with the builder/challenger/verifier protocol, one boundary at a
+time. The design document, challenged and revised, is the deliverable; the
+build is optional and large.
 
 Everything runs locally on this laptop: Node 22.16+, Express, `node:sqlite`,
 Playwright Chromium. No external service is contacted by any project.
