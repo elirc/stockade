@@ -95,6 +95,23 @@ All three follow the same conventions:
    port or real auth; Stockade → partial refunds or a migration; Relay →
    persisted wait deadlines or the local webhook adapter.
 
+## Electives
+
+Two existing projects carry companion upskilling courses in the same
+discipline, each pointing the course's themes at a dimension the rebuilds
+exclude:
+
+- [elirc/lucasrouter](https://github.com/elirc/lucasrouter) (RouteIQ) —
+  heuristic optimization behind a swappable API contract: what a dispatcher
+  can honestly promise about a route produced by an algorithm you intend to
+  replace, and how metrics and tests pin a contract rather than an
+  implementation. Start at its `upskill/LEARNING-PATH.md`.
+- [elirc/aral-tagalog-v2-v2](https://github.com/elirc/aral-tagalog-v2-v2)
+  (Aral) — offline-first sync in a web+mobile monorepo: progress recorded on a
+  phone with no network merging into a server account without loss or double
+  counting. The outbox/reducer/sync path is the identity-and-idempotency
+  theme on a new boundary. Start at its `upskilling/course/LEARNING-PATH.md`.
+
 ## Course capstone: one system that needs all three
 
 When all three projects are done, design (then optionally build) the system
