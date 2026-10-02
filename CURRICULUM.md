@@ -97,7 +97,7 @@ All three follow the same conventions:
 
 ## Electives
 
-Two existing projects carry companion upskilling courses in the same
+Five existing projects carry companion upskilling courses in the same
 discipline, each pointing the course's themes at a dimension the rebuilds
 exclude:
 
@@ -111,6 +111,24 @@ exclude:
   phone with no network merging into a server account without loss or double
   counting. The outbox/reducer/sync path is the identity-and-idempotency
   theme on a new boundary. Start at its `upskilling/course/LEARNING-PATH.md`.
+- [elirc/relay-upskilling](https://github.com/elirc/relay-upskilling) (Relay
+  import platform) — resumable, duplicate-proof bulk import across a
+  TypeScript↔C# process boundary: when a 50,000-row file half-imports and the
+  process dies, what can the operator honestly be told? relay-rebuild's
+  closest sibling, one process boundary wider. Start at its
+  `upskilling/course/LEARNING-PATH.md`.
+- [elirc/elihyper](https://github.com/elirc/elihyper) (HyperNova) — what
+  "production" adds: when a real site ships through Plasmic codegen, AWS
+  Amplify, and third-party tracking, which promises move out of your code,
+  and how do you still verify them? Includes PR-history archaeology on its
+  story-per-PR main branch. Start at its `upskill/LEARNING-PATH.md`.
+- [elirc/bootlocalopusv2](https://github.com/elirc/bootlocalopusv2)
+  (bootlocalopus) — the grading engine itself: running someone else's
+  untrusted code and grading it honestly without the grader lying, hanging,
+  or being forged. Its `upskilling/course/CAPSTONE-TRACK.md` also maps which
+  of its 508 lessons are prerequisites for each rebuild, making it the course
+  index for the whole programme. Start at its
+  `upskilling/course/LEARNING-PATH.md`.
 
 ## Course capstone: one system that needs all three
 
