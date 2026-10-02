@@ -130,6 +130,25 @@ exclude:
   index for the whole programme. Start at its
   `upskilling/course/LEARNING-PATH.md`.
 
+Three .NET electives re-examine the course's invariants in C#/ASP.NET (each
+under `astraupskill/course/` in its repo):
+
+- [elirc/netcalendy](https://github.com/elirc/netcalendy) (NetCalendy) — the
+  last-unit race pointed at *time*: double-booking under concurrency, DST and
+  timezone correctness. Its code tour's central finding is a real one — the
+  conflict check is check-then-insert with no spanning transaction or unique
+  constraint — and the exercises fix it.
+- [elirc/nettrello](https://github.com/elirc/nettrello) (NetTrello) — the
+  cross-stack comparison course: GitJira's four invariants (lost-update
+  protection, auth inside the write, atomic activity, draft-preserving 409)
+  audited against an ASP.NET kanban board, with a verdict table (partial /
+  not enforced) that the exercises close one row at a time.
+- [elirc/netpastebin](https://github.com/elirc/netpastebin) (NetPastebin) —
+  "unlisted, expires in one hour" decomposed into four promises: slug
+  entropy/collision, read-time TTL, limit agreement across layers (the
+  GitJira parser-vs-field lesson found live), and content-type safety. Its
+  worked example shows a break the test suite missed — and writes the test.
+
 ## Course capstone: one system that needs all three
 
 When all three projects are done, design (then optionally build) the system
