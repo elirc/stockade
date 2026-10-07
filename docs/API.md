@@ -14,3 +14,22 @@ API scopes: orders:read, orders:write, inventory:read, inventory:write, returns:
 Outbound envelope: id, type, createdAt, data. Stockade-Event-Id identifies the original event. Stockade-Signature uses t=UNIX_SECONDS,v1=hex(HMAC-SHA256(secret, timestamp + "." + exactBody)). Verify in constant time within five minutes and durably deduplicate event IDs before effects. At-least-once delivery is intentional.
 
 Stripe callback: POST /stripe/webhook. Configure Payments:StripeWebhookSecret. Signature/replay validation precedes parsing and state lookup; live events are rejected. Signed events wake the worker, which retrieves authoritative provider state.
+
+## Verified details
+
+- Base URL: `services/Fulfil/appsettings.json` sets `http://127.0.0.1:5080`; `compose.yaml` publishes
+  `127.0.0.1:5080:5080`. Routes are grouped under `/api/v1` (`services/Fulfil/Program.cs:74`); everything except
+  `/info`, `/merchants` and `/auth/*` requires authentication (`Program.cs:100`).
+- Read endpoints: `GET /data/{resource}` and `GET /orders/{id:guid}` (`Program.cs:122-123`), implemented in
+  `services/Fulfil/Services/ReadApi.cs`. Besides the resources listed above, `/data/health` returns the operational
+  counts used by the dashboard (`ReadApi.cs:64-73`). Transfers, counts and purchases are capped at the newest 100
+  rows (`ReadApi.cs:45-47`), not paginated.
+- Commands: `POST /commands/{operation}` (`Program.cs:102`), dispatched in `services/Fulfil/Services/Commerce.cs`
+  (for example `payment.retry`, `refund.retry` at lines 15-16, `outbox.retry` at line 49).
+- Webhook envelope: the signed body is the `event` object of the stored outbox payload, re-serialized
+  (`Integrations.cs:56-57`), and `Stockade-Event-Id` is that event's `id` (`Integrations.cs:62`). Receivers should
+  verify against the exact bytes received, not a re-serialization of their own.
+- Signature tolerance: the verifier accepts timestamps within ±300 seconds (`Integrations.cs:21`).
+
+**Check:** call `GET /api/v1/state-machine` (`Program.cs:129`) after login and compare the returned transitions with
+`services/Fulfil/Domain/Rules.cs` before writing any client that assumes an order state.

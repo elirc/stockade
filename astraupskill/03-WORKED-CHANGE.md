@@ -42,3 +42,14 @@ export function healthStats(data: Row): HealthStat[] {
 ## Course navigation
 
 [README](README.md) / [01-CODEBASE-MAP](01-CODEBASE-MAP.md) / [02-CONCEPTS](02-CONCEPTS.md) / [03-WORKED-CHANGE](03-WORKED-CHANGE.md) / [04-TESTING-AND-DEBUGGING](04-TESTING-AND-DEBUGGING.md) / [05-PRACTICE](05-PRACTICE.md) / [06-SOLUTIONS-AND-REVIEW](06-SOLUTIONS-AND-REVIEW.md) / [07-TRACE-LAB](07-TRACE-LAB.md) / [VERIFICATION](VERIFICATION.md)
+
+## Where the 12-attempt boundary comes from
+
+The health split mirrors the worker's own policy. The refund recovery query selects `State == "pending" &&
+Attempts < 12` (`services/Fulfil/Services/Worker.cs:26`); a failed provider call increments `Attempts`
+(`Worker.cs:150`); the authorized `refund.retry` command resets `Attempts` to 0 (`services/Fulfil/Services/Team.cs:32-36`).
+The health counts use the same predicate pair (`services/Fulfil/Services/ReadApi.cs:72-73`). If someone changes
+the worker's limit without changing `ReadApi`, the dashboard silently mislabels refunds — a coupling worth a shared
+constant.
+
+**Check:** find every literal `12` in `Worker.cs` and `ReadApi.cs` and say which ones must change together.

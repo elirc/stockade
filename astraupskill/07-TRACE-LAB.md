@@ -42,3 +42,16 @@ export function healthStats(data: Row): HealthStat[] {
 ## Course navigation
 
 [README](README.md) / [01-CODEBASE-MAP](01-CODEBASE-MAP.md) / [02-CONCEPTS](02-CONCEPTS.md) / [03-WORKED-CHANGE](03-WORKED-CHANGE.md) / [04-TESTING-AND-DEBUGGING](04-TESTING-AND-DEBUGGING.md) / [05-PRACTICE](05-PRACTICE.md) / [06-SOLUTIONS-AND-REVIEW](06-SOLUTIONS-AND-REVIEW.md) / [07-TRACE-LAB](07-TRACE-LAB.md) / [VERIFICATION](VERIFICATION.md)
+
+## Trace: one failing refund over time
+
+| Tick (1.5 s each) | `Attempts` before | Selected by `Worker.cs:26`? | Health card |
+| --- | --- | --- | --- |
+| 1 | 0 | yes | Retryable |
+| 2-11 | 1-10 | yes | Retryable |
+| 12 | 11 | yes -> fails -> 12 (`Worker.cs:150`) | Retryable until the increment commits |
+| 13+ | 12 | no | Refunds needing retry (`ReadApi.cs:73`) |
+| after `refund.retry` | 0 (`Team.cs:36`) | yes | Retryable |
+
+**Check:** using the table, explain why an operator who presses Retry refund without fixing the provider cause
+will see the same card again about 18 seconds later.

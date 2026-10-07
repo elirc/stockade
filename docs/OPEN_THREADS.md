@@ -12,3 +12,12 @@ Both phases, twelve feature stories, architecture/API/runbook documentation, 27 
 
 ## SWE continuation
 See [AstraDocs next steps](../astradocs/NEXT_STEPS.md) for prioritized tickets and [the learning roadmap](../astradocs/SWE_ROADMAP.md) for a staged evidence-based program. Documentation and an SDK input correction do not close the unresolved load gate.
+
+## Found during the 2026-10-07 documentation pass (by reading code; not yet ticketed)
+
+- Refund recovery has no backoff and exhausts its 12 automatic attempts in about 18 seconds of worker ticks
+  (`services/Fulfil/Services/Worker.cs:26`, `:150`), unlike payment sagas (`Worker.cs:125`). See RUNBOOK.md.
+- The pending-refund query has no `OrderBy` before `Take(20)` (`Worker.cs:26`), so which refunds are tried each
+  tick is database-order dependent.
+- The SMTP subject in `Worker.cs` (around line 190) contains a replacement character (`"Stockade ? "`), the same encoding damage that
+  had affected SECURITY.md's arrows.

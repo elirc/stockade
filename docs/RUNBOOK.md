@@ -18,3 +18,22 @@ Offline warehouses are excluded from new allocation. Existing held stock require
 
 ## Release gate
 Require final builds/tests, migration/restart/restore evidence, tenant/role/scope checks, actual test-mode Stripe challenge/capture/refund cases, delivery/crash drills, measured load reports, independent review and separate human explain-back. Obtain authorization for public deployment, live financial effects and supplier communication.
+
+## Code anchors for these procedures
+
+- Schema initialization runs in one transaction and records versions in `schema_versions`
+  (`services/Fulfil/Data/Migrations.cs:8`, `:15`, `:29`).
+- The background worker ticks every 1.5 s (`services/Fulfil/Services/Worker.cs:34`) and, per tick, processes up to
+  20 payment sagas, 20 pending refunds, expiry (50 orders), 20 outbox events, then due reconciliation
+  (`Worker.cs:24-30`, `:157`, `:172`). Each item is guarded by a Postgres advisory lease (`Worker.cs:37-40`).
+- Payment retries back off: an unknown outcome increments `Attempts` and pushes `UpdatedAt` forward by
+  `min(120, attempts * 5)` seconds (`Worker.cs:125`); the saga query skips rows touched in the last 2 s and stops
+  at 12 attempts (`Worker.cs:24`).
+- **Refund retries do not back off.** A failed provider refund only increments `Attempts` (`Worker.cs:150`), and
+  the refund query has no time filter or ordering (`Worker.cs:26`). A persistently failing refund therefore uses
+  its 12 automatic attempts within roughly 12 ticks (about 18 s) and then stays `pending` with no further
+  automatic retry. It shows up as "Refunds needing retry" on the health panel (`ReadApi.cs:73`); the authorized
+  `refund.retry` command resets `Attempts` to 0 and requires a reason (`services/Fulfil/Services/Team.cs:32-36`).
+  Fix the provider/configuration cause *before* retrying, or the next 12 attempts are spent just as fast.
+- Dead-letter retry: `outbox.retry` accepts only `dead` events and resets them to pending
+  (`services/Fulfil/Services/Commerce.cs:322`).

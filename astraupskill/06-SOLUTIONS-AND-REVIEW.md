@@ -56,3 +56,14 @@ From [tests/Fulfil.Tests/RefundHealthTests.cs](../tests/Fulfil.Tests/RefundHealt
 ## Course navigation
 
 [README](README.md) / [01-CODEBASE-MAP](01-CODEBASE-MAP.md) / [02-CONCEPTS](02-CONCEPTS.md) / [03-WORKED-CHANGE](03-WORKED-CHANGE.md) / [04-TESTING-AND-DEBUGGING](04-TESTING-AND-DEBUGGING.md) / [05-PRACTICE](05-PRACTICE.md) / [06-SOLUTIONS-AND-REVIEW](06-SOLUTIONS-AND-REVIEW.md) / [07-TRACE-LAB](07-TRACE-LAB.md) / [VERIFICATION](VERIFICATION.md)
+
+## Additional senior-review findings (by reading; not covered by these tests)
+
+1. **The 12-attempt limit is duplicated as a literal** in `Worker.cs:24`, `:26` and `ReadApi.cs:70`, `:72-73`.
+   Extract one constant so the health partition cannot drift from worker behaviour.
+2. **Refunds reach "needing retry" in seconds, not hours.** `ProcessRefund` increments `Attempts` on failure
+   (`Worker.cs:150`) and the selection has no backoff filter (`Worker.cs:26`); with a 1.5 s tick (`Worker.cs:34`) a
+   failing refund is stuck after about 18 seconds. Payment sagas, by contrast, delay by `min(120, attempts*5)` s
+   (`Worker.cs:125`). The health card is accurate, but the policy behind it deserves a backoff.
+3. **Unordered `Take(20)`.** The refund query has no `OrderBy` (`Worker.cs:26`); add one so recovery order is
+   deterministic and old refunds are not starved behind a hot set.

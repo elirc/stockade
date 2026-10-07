@@ -72,8 +72,8 @@ The accepted test evidence covers **34 distinct passing tests**. The commands be
 
 | Check | Recorded command | Exit | Evidence |
 |---|---|---:|---|
-| `astra-astra5-health-tests-r1` | `["python", "scripts/test-refund-health.py"]` | 0 | [record](evidence/astra-astra5-health-tests-r1.json), [log](evidence/astra-astra5-health-tests-r1.log) |
-| `astra-astra5-ui-tests-r1` | `["node", "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js", "run", "test", "--", "--maxWorkers=1", "--minWorkers=1", "--testTimeout=30000"]` | 0 | [record](evidence/astra-astra5-ui-tests-r1.json), [log](evidence/astra-astra5-ui-tests-r1.log) |
-| `astra-astra5-typecheck-r1` | `["node", "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js", "run", "typecheck"]` | 0 | [record](evidence/astra-astra5-typecheck-r1.json), [log](evidence/astra-astra5-typecheck-r1.log) |
+| `astra-astra5-health-tests-r1` | `["python", "scripts/test-refund-health.py"]` | 0 | [record](evidence/astra-astra5-health-tests-r1.json), log not included in this repository |
+| `astra-astra5-ui-tests-r1` | `["node", "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js", "run", "test", "--", "--maxWorkers=1", "--minWorkers=1", "--testTimeout=30000"]` | 0 | [record](evidence/astra-astra5-ui-tests-r1.json), log not included in this repository |
+| `astra-astra5-typecheck-r1` | `["node", "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js", "run", "typecheck"]` | 0 | [record](evidence/astra-astra5-typecheck-r1.json), log not included in this repository |
 
 [Machine-readable results 1](evidence/regression.trx).
